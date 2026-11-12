@@ -85,3 +85,51 @@ export interface XerParseResult {
   tables: XerTableSummary[];
   issues: XerIssue[];
 }
+
+export type ScheduleCheckId = "missing-links" | "negative-float" | "high-float";
+
+interface ScheduleFindingBase {
+  id: string;
+  activity: XerActivity;
+  line: number;
+  message: string;
+  certainty: "confirmed" | "uncertain";
+}
+
+export interface MissingLinksFinding extends ScheduleFindingBase {
+  check: "missing-links";
+  missing: ("predecessor" | "successor")[];
+}
+
+export interface FloatFinding extends ScheduleFindingBase {
+  check: "negative-float" | "high-float";
+  totalFloatHours: number;
+  thresholdHours: number;
+}
+
+export type ScheduleFinding = MissingLinksFinding | FloatFinding;
+
+export interface ScheduleCheckResult {
+  id: ScheduleCheckId;
+  status: "complete" | "partial" | "unavailable";
+  /** Counts refer to imported activities, not rejected activity rows. */
+  assessedCount: number;
+  /** Activities outside the scope of this check, such as completed activities. */
+  excludedCount: number;
+  /** Activities that cannot be assessed because required data is unavailable. */
+  unavailableCount: number;
+  findings: ScheduleFinding[];
+  notes: string[];
+}
+
+export interface ScheduleCheckOptions {
+  /** A finite, non-negative threshold in hours. Defaults to 352. */
+  highFloatThresholdHours?: number;
+}
+
+export interface ScheduleCheckReport {
+  highFloatThresholdHours: number;
+  checks: Record<ScheduleCheckId, ScheduleCheckResult>;
+  /** An activity can appear once per check, and can fail multiple checks. */
+  findings: ScheduleFinding[];
+}
