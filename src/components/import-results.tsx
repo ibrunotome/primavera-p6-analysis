@@ -1,13 +1,10 @@
 import { CheckCircle2, CircleX, FileText, TriangleAlert } from "lucide-react";
+import { FindingsExplorer } from "@/components/findings-explorer";
+import { checkPresentation } from "@/lib/findings";
 import type { ImportedSchedule } from "@/lib/schedule-import";
-import type { ScheduleCheckId, XerIssue } from "@/lib/xer";
+import type { XerIssue } from "@/lib/xer";
 
 const number = new Intl.NumberFormat("en-US");
-const checkLabels: Record<ScheduleCheckId, string> = {
-  "missing-links": "Missing links",
-  "negative-float": "Negative float",
-  "high-float": "High float",
-};
 
 function ImportIssues({ issues }: { issues: XerIssue[] }) {
   if (issues.length === 0) return null;
@@ -144,7 +141,7 @@ export function ImportResults({ result }: { result: ImportedSchedule }) {
             {Object.values(checks.checks).map((check) => (
               <div key={check.id} className="rounded-xl border bg-card p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h4 className="text-sm font-medium">{checkLabels[check.id]}</h4>
+                  <h4 className="text-sm font-medium">{checkPresentation[check.id].label}</h4>
                   <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {check.status}
                   </span>
@@ -176,6 +173,7 @@ export function ImportResults({ result }: { result: ImportedSchedule }) {
           </p>
         </section>
       )}
+      {checks && <FindingsExplorer report={checks} projects={schedule.projects} />}
     </section>
   );
 }
