@@ -1,6 +1,6 @@
-export { parseXer } from "./parser";
-export { parseXerBuffer, readXerFile } from "./file";
-export { runScheduleChecks, DEFAULT_HIGH_FLOAT_HOURS } from "./checks";
+export { parseXer } from './parser'
+export { parseXerBuffer, readXerFile } from './file'
+export { runScheduleChecks, DEFAULT_HIGH_FLOAT_HOURS } from './checks'
 export type {
   FloatFinding,
   MissingLinksFinding,
@@ -18,4 +18,4 @@ export type {
   XerRelationship,
   XerSource,
   XerTableSummary,
-} from "./types";
+} from './types'

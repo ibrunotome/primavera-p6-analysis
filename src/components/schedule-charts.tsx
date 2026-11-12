@@ -1,18 +1,20 @@
-import { Suspense, lazy } from "react";
-import { FindingsChart } from "@/components/findings-chart";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { CheckChartRow } from "@/lib/findings";
-import type { ScheduleCheckReport, XerActivity, XerProject } from "@/lib/xer";
+import { Suspense, lazy } from 'react'
+
+import type { CheckChartRow } from '@/lib/findings'
+import type { ScheduleCheckReport, XerActivity, XerProject } from '@/lib/xer'
+
+import { FindingsChart } from '@/components/findings-chart'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const FloatDistributionChart = lazy(() =>
-  import("./activity-charts").then((module) => ({ default: module.FloatDistributionChart })),
-);
+  import('./activity-charts').then((module) => ({ default: module.FloatDistributionChart })),
+)
 const ActivityStatusChart = lazy(() =>
-  import("./activity-charts").then((module) => ({ default: module.ActivityStatusChart })),
-);
+  import('./activity-charts').then((module) => ({ default: module.ActivityStatusChart })),
+)
 const ActivityTimelineChart = lazy(() =>
-  import("./activity-charts").then((module) => ({ default: module.ActivityTimelineChart })),
-);
+  import('./activity-charts').then((module) => ({ default: module.ActivityTimelineChart })),
+)
 
 function ChartLoading() {
   return (
@@ -22,7 +24,7 @@ function ChartLoading() {
     >
       Loading chart…
     </div>
-  );
+  )
 }
 
 export function ScheduleCharts({
@@ -33,12 +35,12 @@ export function ScheduleCharts({
   selectedCheck,
   onSelectCheck,
 }: {
-  activities: XerActivity[];
-  projects: XerProject[];
-  checks: ScheduleCheckReport;
-  checkRows: CheckChartRow[];
-  selectedCheck: "all" | CheckChartRow["id"];
-  onSelectCheck: (check: CheckChartRow["id"]) => void;
+  activities: XerActivity[]
+  projects: XerProject[]
+  checks: ScheduleCheckReport
+  checkRows: CheckChartRow[]
+  selectedCheck: 'all' | CheckChartRow['id']
+  onSelectCheck: (check: CheckChartRow['id']) => void
 }) {
   return (
     <section aria-labelledby="schedule-charts-heading" className="space-y-3">
@@ -63,10 +65,7 @@ export function ScheduleCharts({
           </TabsContent>
           <TabsContent value="float" className="pt-3">
             <Suspense fallback={<ChartLoading />}>
-              <FloatDistributionChart
-                activities={activities}
-                threshold={checks.highFloatThresholdHours}
-              />
+              <FloatDistributionChart activities={activities} threshold={checks.highFloatThresholdHours} />
             </Suspense>
           </TabsContent>
           <TabsContent value="status" className="pt-3">
@@ -82,5 +81,5 @@ export function ScheduleCharts({
         </Tabs>
       </div>
     </section>
-  );
+  )
 }

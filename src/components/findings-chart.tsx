@@ -1,48 +1,50 @@
-import { useMemo } from "react";
-import { barX, defineChart, text } from "@tanstack/charts";
-import { Chart } from "@tanstack/charts/react";
-import { scaleBand } from "@tanstack/charts/scales/band";
-import { scaleLinear } from "@tanstack/charts/scales/linear";
-import { tooltip } from "@tanstack/charts/tooltip";
-import { Button } from "@/components/ui/button";
-import type { CheckChartRow, FindingFilters } from "@/lib/findings";
-import type { ScheduleCheckId } from "@/lib/xer";
+import { barX, defineChart, text } from '@tanstack/charts'
+import { Chart } from '@tanstack/charts/react'
+import { scaleBand } from '@tanstack/charts/scales/band'
+import { scaleLinear } from '@tanstack/charts/scales/linear'
+import { tooltip } from '@tanstack/charts/tooltip'
+import { useMemo } from 'react'
 
-const number = new Intl.NumberFormat("en-US");
+import type { CheckChartRow, FindingFilters } from '@/lib/findings'
+import type { ScheduleCheckId } from '@/lib/xer'
+
+import { Button } from '@/components/ui/button'
+
+const number = new Intl.NumberFormat('en-US')
 
 interface FindingsChartProps {
-  rows: CheckChartRow[];
-  selected: FindingFilters["check"];
-  onSelect: (check: ScheduleCheckId) => void;
+  rows: CheckChartRow[]
+  selected: FindingFilters['check']
+  onSelect: (check: ScheduleCheckId) => void
 }
 
 export function FindingsChart({ rows, selected, onSelect }: FindingsChartProps) {
   const available = useMemo(
     () => rows.flatMap((row) => (row.count === null ? [] : [{ ...row, count: row.count }])),
     [rows],
-  );
+  )
   const definition = useMemo(
     function defineFindingsChart() {
-      const max = Math.max(0, ...available.map((row) => row.count));
-      const step = Math.max(1, Math.ceil(max / 4));
+      const max = Math.max(0, ...available.map((row) => row.count))
+      const step = Math.max(1, Math.ceil(max / 4))
       return defineChart({
         marks: [
           barX(available, {
-            x: "count",
-            y: "label",
-            key: "id",
-            fill: (row) => (selected === "all" || selected === row.id ? row.color : "var(--muted)"),
+            x: 'count',
+            y: 'label',
+            key: 'id',
+            fill: (row) => (selected === 'all' || selected === row.id ? row.color : 'var(--muted)'),
             radius: 4,
             maxThickness: 34,
           }),
           text(available, {
-            x: "count",
-            y: "label",
+            x: 'count',
+            y: 'label',
             text: (row) => number.format(row.count),
             dx: 8,
-            anchor: "start",
+            anchor: 'start',
             fontSize: 12,
-            fill: "var(--foreground)",
+            fill: 'var(--foreground)',
           }),
         ],
         scales: {
@@ -50,7 +52,7 @@ export function FindingsChart({ rows, selected, onSelect }: FindingsChartProps) 
             scale: () => scaleLinear().domain([0, step * 5]),
             grid: true,
             axis: {
-              label: "Activity findings",
+              label: 'Activity findings',
               ticks: {
                 values: Array.from({ length: 6 }, (_, index) => index * step),
                 format: (value) => number.format(value),
@@ -60,18 +62,15 @@ export function FindingsChart({ rows, selected, onSelect }: FindingsChartProps) 
           y: { scale: () => scaleBand().padding(0.3) },
         },
         tooltip,
-      });
+      })
     },
     [available, selected],
-  );
-  const incomplete = rows.some((row) => row.status !== "complete");
-  const uncertain = rows.some((row) => row.uncertainCount > 0);
+  )
+  const incomplete = rows.some((row) => row.status !== 'complete')
+  const uncertain = rows.some((row) => row.uncertainCount > 0)
 
   return (
-    <section
-      aria-labelledby="findings-chart-heading"
-      className="rounded-2xl border bg-card p-5 sm:p-6"
-    >
+    <section aria-labelledby="findings-chart-heading" className="rounded-2xl border bg-card p-5 sm:p-6">
       <h3 id="findings-chart-heading" className="font-semibold tracking-tight">
         Findings by check
       </h3>
@@ -85,7 +84,7 @@ export function FindingsChart({ rows, selected, onSelect }: FindingsChartProps) 
           ariaLabel="Schedule findings by check"
           ariaDescription="Full check totals. Use arrow keys to navigate, then Enter to filter the table. Exact counts are also available in the buttons below."
           onSelect={(point) => {
-            if (point) onSelect(point.datum.id);
+            if (point) onSelect(point.datum.id)
           }}
         />
       ) : (
@@ -99,29 +98,22 @@ export function FindingsChart({ rows, selected, onSelect }: FindingsChartProps) 
             key={row.id}
             type="button"
             variant="outline"
-            className="h-auto min-h-10 whitespace-normal py-2 text-left"
+            className="h-auto min-h-10 py-2 text-left whitespace-normal"
             disabled={row.count === null}
             aria-pressed={selected === row.id}
             onClick={() => onSelect(row.id)}
           >
-            <span
-              className="size-2 shrink-0 rounded-full"
-              style={{ background: row.color }}
-              aria-hidden="true"
-            />
-            {row.label} · {row.count === null ? "Unavailable" : number.format(row.count)}
-            {row.status === "partial" && (
-              <span className="text-xs text-muted-foreground">(partial)</span>
-            )}
+            <span className="size-2 shrink-0 rounded-full" style={{ background: row.color }} aria-hidden="true" />
+            {row.label} · {row.count === null ? 'Unavailable' : number.format(row.count)}
+            {row.status === 'partial' && <span className="text-xs text-muted-foreground">(partial)</span>}
           </Button>
         ))}
       </div>
       <p className="mt-3 text-xs leading-5 text-muted-foreground">
         Totals stay the same when the table is filtered. Activities can appear in multiple checks.
-        {incomplete &&
-          " Some check totals cover partial data; unavailable checks are omitted from the chart."}
-        {uncertain && " Counts include uncertain findings."}
+        {incomplete && ' Some check totals cover partial data; unavailable checks are omitted from the chart.'}
+        {uncertain && ' Counts include uncertain findings.'}
       </p>
     </section>
-  );
+  )
 }
