@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ArrowUpRight, FileText, FolderOpen, LoaderCircle, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { scheduleExamples } from "@/lib/schedule-import";
 import type { ScheduleInput } from "@/lib/schedule-import";
+import type { XerEncoding } from "@/lib/xer";
 
 interface ScheduleImporterProps {
   loadingFilename: string | null;
@@ -18,7 +19,13 @@ export function ScheduleImporter({
   onCancel,
 }: ScheduleImporterProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [encoding, setEncoding] = useState<XerEncoding | "auto">("auto");
   const busy = loadingFilename !== null;
+
+  function importLocalFile(file: File) {
+    if (encoding === "auto") onImport({ kind: "local", file });
+    else onImport({ kind: "local", file, encoding });
+  }
 
   return (
     <section aria-labelledby="import-heading" className="rounded-2xl border bg-card">
@@ -50,7 +57,7 @@ export function ScheduleImporter({
             onChange={(event) => {
               const file = event.currentTarget.files?.[0];
               event.currentTarget.value = "";
-              if (file) onImport({ kind: "local", file });
+              if (file) importLocalFile(file);
             }}
           />
           <Button
@@ -63,6 +70,32 @@ export function ScheduleImporter({
             <FolderOpen aria-hidden="true" />
             Choose .xer file
           </Button>
+          <details className="mt-4 max-w-64 text-left">
+            <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+              Text encoding (optional)
+            </summary>
+            <div className="mt-3">
+              <label htmlFor="xer-encoding" className="mb-1.5 block text-xs font-medium">
+                File encoding
+              </label>
+              <select
+                id="xer-encoding"
+                className="h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+                value={encoding}
+                disabled={busy}
+                onChange={(event) => setEncoding(event.currentTarget.value as XerEncoding | "auto")}
+              >
+                <option value="auto">Automatic (UTF-8 / Windows-1252)</option>
+                <option value="windows-1252">Western (Windows-1252)</option>
+                <option value="windows-1256">Arabic (Windows-1256)</option>
+                <option value="utf-8">UTF-8</option>
+              </select>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                If activity names look incorrect, choose the code page used when the XER was
+                exported.
+              </p>
+            </div>
+          </details>
         </div>
         <div>
           <h3 className="mb-3 text-sm font-medium">Try an example</h3>

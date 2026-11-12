@@ -54,6 +54,16 @@ describe("schedule imports", () => {
     expect(result.checks?.checks["high-float"].findings).toHaveLength(10);
   });
 
+  it("uses the Rehab sample's Arabic Windows-1256 encoding", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(sample("rehab-2.xer"))));
+    const result = await importSchedule({ kind: "example", example: scheduleExamples[1] });
+
+    expect(result.schedule.encoding).toBe("windows-1256");
+    expect(result.schedule.activities.find((activity) => activity.code === "V3101200")?.name).toBe(
+      "عزل أرضيات الحمامات",
+    );
+  });
+
   it("labels the modified example separately from the public originals", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(sample("airport-errors.xer"))));
     const result = await importSchedule({ kind: "example", example: scheduleExamples[2] });

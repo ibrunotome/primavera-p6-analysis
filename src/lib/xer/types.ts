@@ -1,4 +1,4 @@
-export type XerEncoding = "utf-8" | "windows-1252";
+export type XerEncoding = "utf-8" | "windows-1252" | "windows-1256";
 
 export type XerIssueCode =
   | "invalid-header"

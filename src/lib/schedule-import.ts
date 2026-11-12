@@ -1,5 +1,5 @@
 import { parseXerBuffer, runScheduleChecks } from "./xer";
-import type { ScheduleCheckReport, XerParseResult } from "./xer";
+import type { ScheduleCheckReport, XerEncoding, XerParseResult } from "./xer";
 
 export const scheduleExamples = [
   {
@@ -7,24 +7,27 @@ export const scheduleExamples = [
     name: "Airport",
     description: "Public original · 66 activities · 71 KB",
     modified: false,
+    encoding: "windows-1252",
   },
   {
     filename: "rehab-2.xer",
     name: "Rehab",
     description: "Public original · 6,977 activities · 18.6 MB",
     modified: false,
+    encoding: "windows-1256",
   },
   {
     filename: "airport-errors.xer",
     name: "Airport with errors",
     description: "Modified demo · deliberate import issues",
     modified: true,
+    encoding: "windows-1252",
   },
 ] as const;
 
 export type ScheduleExample = (typeof scheduleExamples)[number];
 export type ScheduleInput =
-  | { kind: "local"; file: File }
+  | { kind: "local"; file: File; encoding?: XerEncoding }
   | { kind: "example"; example: ScheduleExample };
 
 export interface ImportedSchedule {
@@ -70,7 +73,8 @@ export async function importSchedule(
   if (buffer.byteLength === 0) {
     throw new Error("This file is empty. Choose a Primavera P6 .xer export.");
   }
-  const schedule = parseXerBuffer(buffer);
+  const encoding = input.kind === "local" ? input.encoding : input.example.encoding;
+  const schedule = parseXerBuffer(buffer, encoding);
   return {
     filename,
     byteLength: buffer.byteLength,

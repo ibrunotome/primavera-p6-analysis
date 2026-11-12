@@ -2,9 +2,10 @@ import { parseXer } from "./parser";
 import type { XerEncoding, XerParseResult } from "./types";
 
 /**
- * Prefer valid UTF-8; fall back to the legacy encoding used by the public samples.
- * An explicit encoding handles files whose byte sequences are valid in both.
- * File read failures and explicitly selected UTF-8 decoding failures reject/throw.
+ * Prefer valid UTF-8; otherwise default to Windows-1252 for legacy exports.
+ * An explicit encoding handles legacy code pages such as Arabic Windows-1256,
+ * which cannot be reliably distinguished from Windows-1252 from bytes alone.
+ * File read failures and explicitly selected decoding failures reject/throw.
  */
 export function parseXerBuffer(buffer: ArrayBuffer, encoding?: XerEncoding): XerParseResult {
   let text: string;

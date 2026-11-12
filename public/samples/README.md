@@ -4,10 +4,10 @@ The two public originals below are unmodified XER examples from
 [JaiLaff/XER-Splitter](https://github.com/JaiLaff/XER-Splitter), pinned to commit
 `58a1000ed503576de967c578f10ac09807444c05`.
 
-| File                         |      Bytes | Activities |
-| ---------------------------- | ---------: | ---------: |
-| [airport.xer](./airport.xer) |     71,429 |         66 |
-| [rehab-2.xer](./rehab-2.xer) | 18,592,333 |      6,977 |
+| File                         |      Bytes | Activities | Encoding     |
+| ---------------------------- | ---------: | ---------: | ------------ |
+| [airport.xer](./airport.xer) |     71,429 |         66 | Windows-1252 |
+| [rehab-2.xer](./rehab-2.xer) | 18,592,333 |      6,977 | Windows-1256 |
 
 ## Sources
 
@@ -52,8 +52,10 @@ The fixture is available at /samples/airport-errors.xer when the app runs.
 
 ## Reading and validation
 
-Both files retain their original Windows-1252 encoding. In the browser, read
-their bytes using `arrayBuffer()` and decode with `TextDecoder("windows-1252")`.
+Both files retain their original encodings. airport.xer uses Windows-1252 and
+rehab-2.xer uses Windows-1256 for its Arabic activity names. In the browser,
+read their bytes using `arrayBuffer()` and decode with the matching
+`TextDecoder` code page.
 
 Readable files can still contain schedule warnings. These originals are not
 guaranteed to pass the three schedule checks. Any deliberately modified error

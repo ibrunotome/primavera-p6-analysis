@@ -369,20 +369,43 @@ describe("browser file reading and decoding", () => {
     expect(parseXerBuffer(bytes.buffer).activities[1].name).toBe("é");
     expect(parseXerBuffer(bytes.buffer, "windows-1252").activities[1].name).toBe("Ã©");
   });
+
+  it("decodes Arabic XER text with Windows-1256", () => {
+    const path = new URL("../../../public/samples/rehab-2.xer", import.meta.url);
+    const bytes = new Uint8Array(readFileSync(path));
+    const result = parseXerBuffer(bytes.buffer, "windows-1256");
+
+    expect(result.encoding).toBe("windows-1256");
+    expect(result.activities.find((activity) => activity.code === "V3101200")?.name).toBe(
+      "عزل أرضيات الحمامات",
+    );
+  });
 });
 
 describe("unmodified public samples", () => {
   it.each([
-    { filename: "airport.xer", activities: 66, relationships: 84, blankFloat: 0 },
-    { filename: "rehab-2.xer", activities: 6977, relationships: 10730, blankFloat: 1 },
+    {
+      filename: "airport.xer",
+      encoding: "windows-1252" as const,
+      activities: 66,
+      relationships: 84,
+      blankFloat: 0,
+    },
+    {
+      filename: "rehab-2.xer",
+      encoding: "windows-1256" as const,
+      activities: 6977,
+      relationships: 10730,
+      blankFloat: 1,
+    },
   ])(
     "imports $filename with its expected record counts",
-    ({ filename, activities, relationships, blankFloat }) => {
+    ({ filename, encoding, activities, relationships, blankFloat }) => {
       const path = new URL("../../../public/samples/" + filename, import.meta.url);
       const bytes = new Uint8Array(readFileSync(path));
-      const result = parseXerBuffer(bytes.buffer);
+      const result = parseXerBuffer(bytes.buffer, encoding);
       expect(result.status).toBe("success");
-      expect(result.encoding).toBe("windows-1252");
+      expect(result.encoding).toBe(encoding);
       expect(result.issues).toEqual([]);
       expect(result.projects).toHaveLength(1);
       expect(result.activities).toHaveLength(activities);
