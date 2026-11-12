@@ -6,6 +6,7 @@ import { defineConfig, lazyPlugins } from 'vite-plus'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS === 'true' ? '/primavera-p6-analysis/' : '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
