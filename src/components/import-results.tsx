@@ -173,7 +173,13 @@ export function ImportResults({ result }: { result: ImportedSchedule }) {
           </p>
         </section>
       )}
-      {checks && <FindingsExplorer report={checks} projects={schedule.projects} />}
+      {checks && (
+        <FindingsExplorer
+          report={checks}
+          projects={schedule.projects}
+          activities={schedule.activities}
+        />
+      )}
     </section>
   );
 }

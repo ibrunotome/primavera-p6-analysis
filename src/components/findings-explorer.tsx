@@ -13,8 +13,8 @@ import {
 } from "@tanstack/react-table";
 import type { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ScheduleCharts } from "@/components/schedule-charts";
 import { Button } from "@/components/ui/button";
-import { FindingsChart } from "@/components/findings-chart";
 import {
   checkPresentation,
   createCheckChartRows,
@@ -22,7 +22,7 @@ import {
   filterFindingRows,
 } from "@/lib/findings";
 import type { FindingFilters, FindingRow } from "@/lib/findings";
-import type { ScheduleCheckId, ScheduleCheckReport, XerProject } from "@/lib/xer";
+import type { ScheduleCheckId, ScheduleCheckReport, XerActivity, XerProject } from "@/lib/xer";
 
 const number = new Intl.NumberFormat("en-US");
 const floatNumber = new Intl.NumberFormat("en-US", { maximumSignificantDigits: 12 });
@@ -98,9 +98,11 @@ const controlClass =
 export function FindingsExplorer({
   report,
   projects,
+  activities,
 }: {
   report: ScheduleCheckReport;
   projects: XerProject[];
+  activities: XerActivity[];
 }) {
   const [filters, setFilters] = useState<FindingFilters>(initialFilters);
   const [sorting, setSorting] = useState<SortingState>([{ id: "activityCode", desc: false }]);
@@ -151,7 +153,14 @@ export function FindingsExplorer({
 
   return (
     <div className="space-y-5">
-      <FindingsChart rows={chartRows} selected={filters.check} onSelect={selectChartCheck} />
+      <ScheduleCharts
+        activities={activities}
+        projects={projects}
+        checks={report}
+        checkRows={chartRows}
+        selectedCheck={filters.check}
+        onSelectCheck={selectChartCheck}
+      />
       <section aria-labelledby="findings-heading" className="min-w-0 rounded-2xl border bg-card">
         <div className="space-y-4 border-b p-5 sm:p-6">
           <div className="flex flex-wrap items-baseline justify-between gap-3">

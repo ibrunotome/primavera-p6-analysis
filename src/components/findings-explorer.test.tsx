@@ -15,7 +15,16 @@ function showFixture(truncated = false) {
     ? parseXer(new TextDecoder("windows-1252").decode(bytes).replace(/\n%E\s*$/, ""))
     : parseXerBuffer(bytes.buffer);
   const report = runScheduleChecks(schedule);
-  return { ...render(<FindingsExplorer report={report} projects={schedule.projects} />), report };
+  return {
+    ...render(
+      <FindingsExplorer
+        report={report}
+        projects={schedule.projects}
+        activities={schedule.activities}
+      />,
+    ),
+    report,
+  };
 }
 
 function table() {
@@ -133,7 +142,13 @@ describe("findings table and chart", () => {
     const schedule = parseXerBuffer(bytes.buffer);
     schedule.activities.find((activity) => activity.code === "BA-P1-20")!.totalFloatHours = null;
     schedule.activities.find((activity) => activity.code === "BA-P1-40")!.totalFloatHours = -0.001;
-    render(<FindingsExplorer report={runScheduleChecks(schedule)} projects={schedule.projects} />);
+    render(
+      <FindingsExplorer
+        report={runScheduleChecks(schedule)}
+        projects={schedule.projects}
+        activities={schedule.activities}
+      />,
+    );
     const header = screen.getByRole("columnheader", { name: "Float (h)" });
     await user.click(within(header).getByRole("button"));
     const ascending = within(table()).getAllByRole("row").slice(1);
@@ -169,7 +184,13 @@ describe("findings table and chart", () => {
         "%E",
       ].join("\n"),
     );
-    render(<FindingsExplorer report={runScheduleChecks(schedule)} projects={schedule.projects} />);
+    render(
+      <FindingsExplorer
+        report={runScheduleChecks(schedule)}
+        projects={schedule.projects}
+        activities={schedule.activities}
+      />,
+    );
     expect(screen.getByText("No checks could be assessed from the available data.")).toBeDefined();
     for (const label of ["Missing links", "Negative float", "High float"]) {
       expect(screen.getByRole("button", { name: label + " · Unavailable" })).toHaveProperty(
