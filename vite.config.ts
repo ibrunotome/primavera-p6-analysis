@@ -1,9 +1,16 @@
+import { fileURLToPath, URL } from "node:url";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, lazyPlugins } from "vite-plus";
 
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   staged: {
     "*": "vp check --fix",
   },
@@ -31,5 +38,5 @@ export default defineConfig({
       },
     ],
   },
-  plugins: lazyPlugins(() => [react(), babel({ presets: [reactCompilerPreset()] })]),
+  plugins: lazyPlugins(() => [tailwindcss(), react(), babel({ presets: [reactCompilerPreset()] })]),
 });
