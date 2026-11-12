@@ -178,6 +178,7 @@ export function ImportResults({ result }: { result: ImportedSchedule }) {
           report={checks}
           projects={schedule.projects}
           activities={schedule.activities}
+          relationships={schedule.relationships}
         />
       )}
     </section>

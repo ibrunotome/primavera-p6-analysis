@@ -10,21 +10,24 @@ import { parseXer, parseXerBuffer, runScheduleChecks } from "@/lib/xer";
 
 const bytes = new Uint8Array(readFileSync(resolve("public/samples/airport-errors.xer")));
 
-function showFixture(truncated = false) {
+function showFixture(
+  truncated = false,
+  activeTable: "Activities" | "Relationships" | "Findings" = "Findings",
+) {
   const schedule = truncated
     ? parseXer(new TextDecoder("windows-1252").decode(bytes).replace(/\n%E\s*$/, ""))
     : parseXerBuffer(bytes.buffer);
   const report = runScheduleChecks(schedule);
-  return {
-    ...render(
-      <FindingsExplorer
-        report={report}
-        projects={schedule.projects}
-        activities={schedule.activities}
-      />,
-    ),
-    report,
-  };
+  const view = render(
+    <FindingsExplorer
+      report={report}
+      projects={schedule.projects}
+      activities={schedule.activities}
+      relationships={schedule.relationships}
+    />,
+  );
+  if (activeTable !== "Activities") fireEvent.click(screen.getByRole("tab", { name: activeTable }));
+  return { ...view, report };
 }
 
 function table() {
@@ -55,6 +58,32 @@ describe("findings table and chart", () => {
     expect(within(table()).getAllByRole("row")).toHaveLength(13);
     expect(screen.getByRole("button", { name: /High float · 10/ })).toBeDefined();
     expect(screen.getByText("12 of 12 findings")).toBeDefined();
+  });
+
+  it("browses all activities and searches by activity code", async () => {
+    const user = userEvent.setup();
+    showFixture(false, "Activities");
+    expect(await screen.findByText("66 activities")).toBeDefined();
+    expect(screen.getByText("Showing 1–25 of 66 activities")).toBeDefined();
+    expect(within(table()).getAllByRole("row")).toHaveLength(26);
+    expect(within(table()).getByText("Negative float")).toBeDefined();
+
+    await user.type(screen.getByRole("searchbox", { name: "Search activities" }), "BA-P1-40");
+    expect(within(table()).getAllByRole("row")).toHaveLength(2);
+    expect(within(table()).getByText("P.C For Footings")).toBeDefined();
+  });
+
+  it("browses and paginates imported predecessor-to-successor relationships", async () => {
+    const user = userEvent.setup();
+    showFixture(false, "Relationships");
+    expect(await screen.findByText("83 relationships")).toBeDefined();
+    expect(screen.getByText("Showing 1–25 of 83 relationships")).toBeDefined();
+    expect(screen.getByRole("columnheader", { name: "Relationship" })).toBeDefined();
+    expect(within(table()).getAllByRole("row")).toHaveLength(26);
+
+    await user.click(screen.getByRole("button", { name: "Next relationships page" }));
+    expect(screen.getByText("Showing 26–50 of 83 relationships")).toBeDefined();
+    expect(within(table()).getAllByRole("row")).toHaveLength(26);
   });
 
   it("searches findings and leaves chart totals unchanged", async () => {
@@ -147,8 +176,10 @@ describe("findings table and chart", () => {
         report={runScheduleChecks(schedule)}
         projects={schedule.projects}
         activities={schedule.activities}
+        relationships={schedule.relationships}
       />,
     );
+    fireEvent.click(screen.getByRole("tab", { name: "Findings" }));
     const header = screen.getByRole("columnheader", { name: "Float (h)" });
     await user.click(within(header).getByRole("button"));
     const ascending = within(table()).getAllByRole("row").slice(1);
@@ -189,8 +220,10 @@ describe("findings table and chart", () => {
         report={runScheduleChecks(schedule)}
         projects={schedule.projects}
         activities={schedule.activities}
+        relationships={schedule.relationships}
       />,
     );
+    fireEvent.click(screen.getByRole("tab", { name: "Findings" }));
     expect(screen.getByText("No checks could be assessed from the available data.")).toBeDefined();
     for (const label of ["Missing links", "Negative float", "High float"]) {
       expect(screen.getByRole("button", { name: label + " · Unavailable" })).toHaveProperty(
